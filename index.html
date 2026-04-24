@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-mood="neutral">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>EmoOS — Adaptive Emotional Intelligence Platform</title>
+  <meta name="description" content="EmoOS: world-class emotional operating system with real-time AI face+voice emotion detection, Echo companion, gamification, wellness tools, and more. 100% on-device, privacy-first." />
+  <meta name="keywords" content="emotion detection, AI emotion, emotional intelligence, EmoOS, face emotion, voice emotion, mood tracking, wellness" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="EmoOS — Emotional Operating System" />
+  <meta property="og:description" content="Real-time multimodal AI emotion detection with companion AI, gamification, and wellness. 100% on-device." />
+  <meta property="og:type" content="website" />
+
+  <!-- Styles (modular CSS) -->
+  <link rel="stylesheet" href="css/design-system.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <!-- Libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+<!-- ══════════ AMBIENT BACKGROUND ══════════ -->
+<div id="ambientMesh" aria-hidden="true">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+<!-- ══════════ LOADER ══════════ -->
+<div id="loaderOverlay" role="status" aria-label="Loading">
+  <div class="loader-logo" aria-hidden="true">🧠</div>
+  <h2 class="loader-title text-gradient">EmoOS</h2>
+  <div class="loader-bar-track"><div class="loader-bar-fill" id="loaderFill"></div></div>
+  <p class="loader-status" id="loaderStatus">Initialising…</p>
+</div>
+
+<!-- ══════════ ONBOARDING ══════════ -->
+<div id="onboardingOverlay" class="onboarding-overlay" style="display:none;"></div>
+
+<!-- ══════════ PRIVACY MODAL ══════════ -->
+<div class="modal-overlay" id="privacyModal" role="dialog" aria-modal="true">
+  <div class="glass-card modal-box" style="text-align:center">
+    <span class="modal-icon">🔒</span>
+    <h2 data-i18n="ui.privacyTitle">Privacy First</h2>
+    <p class="modal-body" data-i18n="ui.privacyBody">EmoOS runs entirely on your device. All video + audio processing happens locally — no images, video, or biometric data is ever sent to any server.</p>
+    <button class="btn btn-primary btn-full" id="privacyAcceptBtn">I understand — let's go! 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true">
+  <div class="glass-card modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title">Settings</h2>
+      <button class="modal-close" data-close-modal aria-label="Close">✕</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Theme</div></div>
+      <button class="btn btn-icon" id="themeToggleBtn" title="Toggle theme">🌙</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Language</div></div>
+      <select class="select" id="langSelectSettings">
+        <option value="en">🇬🇧 English</option>
+        <option value="hi">🇮🇳 हिंदी</option>
+        <option value="es">🇪🇸 Español</option>
+      </select>
+    </div>
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+      <div class="settings-label">📊 Feedback Data</div>
+      <div style="display:flex;gap:.5rem;width:100%">
+        <button class="btn btn-sm btn-secondary" id="exportFeedbackBtn">📥 Export Feedback CSV</button>
+        <button class="btn btn-sm btn-secondary" id="exportSessionBtn">📊 Export Session</button>
+      </div>
+    </div>
+    <div style="margin-top:.8rem;font-size:var(--fs-xs);color:var(--text-subtle);line-height:1.6">
+      ⚙️ EmoOS v3.0 · Multimodal AI · WebGL Accelerated<br/>
+      🧠 Face + Voice + Blink Fusion · On-Device Inference<br/>
+      🔒 Zero data transmitted · Privacy-first architecture
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ WELLNESS OVERLAY ══════════ -->
+<div id="wellnessOverlay" class="wellness-overlay"></div>
+
+<!-- ══════════ TOAST CONTAINER ══════════ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ══════════ APP SHELL ══════════ -->
+<div class="app-shell">
+
+  <!-- ── HEADER ── -->
+  <header class="app-header">
+    <div class="header-left">
+      <a href="#" class="header-logo" aria-label="EmoOS home">
+        <span class="logo-icon">🧠</span>
+        <span class="logo-text text-gradient">EmoOS</span>
+        <span class="logo-badge">v3</span>
+      </a>
+      <span class="header-tagline">Adaptive Emotional Intelligence</span>
+    </div>
+    <div class="header-right">
+      <div class="hud-strip">
+        <div class="hud-level">
+          <div class="hud-level-icon">⚡</div>
+          <span id="hudLevel">Lv.1</span>
+        </div>
+        <div class="hud-xp">
+          <div class="hud-xp-bar"><div class="hud-xp-fill" id="hudXpFill" style="width:0%"></div></div>
+          <span class="hud-xp-text" id="hudXpText">0 XP</span>
+        </div>
+        <span class="hud-streak" id="hudStreak">🔥0</span>
+      </div>
+      <select class="select" id="langSelectHeader" aria-label="Language" style="width:70px;font-size:var(--fs-xs)">
+        <option value="en">🇬🇧 EN</option>
+        <option value="hi">🇮🇳 HI</option>
+        <option value="es">🇪🇸 ES</option>
+      </select>
+      <button class="btn-icon" id="settingsBtn" title="Settings" aria-label="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="app-main">
+
+    <!-- ═══════════ TAB: SCAN ═══════════ -->
+    <div class="tab-panel active" id="panel-scan">
+      <div class="scan-grid">
+        <!-- Camera Panel -->
+        <section class="cam-panel" aria-label="Camera feed">
+          <div class="cam-wrapper">
+            <video id="videoEl" autoplay muted playsinline aria-label="Camera"></video>
+            <canvas id="overlayCanvas" aria-hidden="true"></canvas>
+            <div class="cam-scanline"></div>
+            <div id="startCamOverlay">
+              <div class="cam-icon">📷</div>
+              <button class="btn btn-primary" id="startCamBtn">Enable Camera</button>
+              <p id="camHint">Camera access required for emotion detection</p>
+            </div>
+            <div id="noFaceOverlay"><span class="nf-icon">🙈</span><span>No face detected — move closer</span></div>
+            <div class="live-badge"><span class="live-dot"></span><span>LIVE</span></div>
+            <div class="perf-row">
+              <div class="perf-badge" id="infBadge">--ms</div>
+              <div class="perf-badge" id="fpsBadge" style="color:var(--accent2)">--fps</div>
+            </div>
+          </div>
+          <div id="emotionStrip" class="emotion-strip" role="list"></div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button class="quick-action-btn" id="btnBreathe"><span class="quick-action-icon">🌬️</span>Breathe</button>
+            <button class="quick-action-btn" id="btnAffirm"><span class="quick-action-icon">✨</span>Affirm</button>
+            <button class="quick-action-btn" id="btnSOS"><span class="quick-action-icon">🆘</span>SOS</button>
+            <button class="quick-action-btn" onclick="EmoApp.switchTab('journal')"><span class="quick-action-icon">📝</span>Journal</button>
+            <button class="quick-action-btn" onclick="EmoApp.switchTab('echo')"><span class="quick-action-icon">🤖</span>Echo</button>
+          </div>
+        </section>
+
+        <!-- Emotion Panel -->
+        <aside class="emotion-panel">
+          <!-- Main Emotion Card -->
+          <div class="glass-card slide-up">
+            <div class="emotion-display">
+              <div id="bigEmojiWrap" class="big-emoji-wrap"><span id="bigEmoji">🤔</span></div>
+              <div id="emotionNameDisplay" style="font-size:var(--fs-2xl);font-weight:var(--fw-black);font-family:var(--font-heading)">Waiting…</div>
+              <div id="emotionConfDisplay" style="font-size:var(--fs-sm);color:var(--text-muted)">Point your face at the camera</div>
+              <div id="mixedIndicator" style="display:none;font-size:var(--fs-xs);color:var(--accent);margin-top:var(--sp-1)"></div>
+              <div id="intensityBadge" style="font-size:var(--fs-xs);color:var(--text-subtle)"></div>
+            </div>
+            <!-- Weather Widget -->
+            <div class="weather-widget" style="padding:var(--sp-2)">
+              <span id="weatherEmoji" style="font-size:1.5rem">☁️</span>
+              <div id="weatherDesc" class="weather-desc" style="font-size:var(--fs-xs)">Awaiting detection…</div>
+            </div>
+            <!-- Prob bars -->
+            <div class="prob-section">
+              <div class="prob-section-label">Confidence</div>
+              <div id="probBarsContainer"></div>
+            </div>
+          </div>
+
+          <!-- AI Response Card -->
+          <div class="glass-card slide-up" style="animation-delay:.08s">
+            <div class="response-label">🧠 AI says:</div>
+            <p id="responseText" class="response-text">Your mood analysis will appear here once a face is detected. 😊</p>
+          </div>
+
+          <!-- Feedback Card -->
+          <div class="glass-card slide-up" style="animation-delay:.14s">
+            <div style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-2)">Was this correct?</div>
+            <div id="feedbackBtns" class="feedback-btns">
+              <button class="btn btn-success btn-sm" id="feedbackYesBtn">✓ Yes!</button>
+              <button class="btn btn-danger btn-sm" id="feedbackNoBtn">✗ Correct it</button>
+            </div>
+            <div id="feedbackThanks">Thanks! Saved for model training 💾</div>
+            <div id="correctionPicker"></div>
+          </div>
+
+          <!-- GIF Card -->
+          <div class="glass-card slide-up" style="animation-delay:.2s">
+            <div class="gif-label">🎬 Your vibe right now</div>
+            <div id="gifFrame" class="gif-frame">
+              <div class="gif-placeholder"><span class="gp-icon">🎭</span><p>GIF will appear here</p></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ═══════════ TAB: JOURNAL ═══════════ -->
+    <div class="tab-panel" id="panel-journal">
+      <div class="journal-header">
+        <h2 style="font-family:var(--font-heading);font-size:var(--fs-xl);font-weight:var(--fw-bold)">📝 Emotional Journal</h2>
+      </div>
+      <div class="journal-compose glass-card no-hover">
+        <textarea class="input" id="journalInput" placeholder="How are you feeling? Write your thoughts..." rows="3"></textarea>
+        <button class="btn btn-primary btn-sm" id="journalSubmitBtn" style="margin-top:var(--sp-3)">Save Entry 📝</button>
+      </div>
+      <div id="journalList" class="journal-list"></div>
+    </div>
+
+    <!-- ═══════════ TAB: INSIGHTS ═══════════ -->
+    <div class="tab-panel" id="panel-insights">
+      <div class="dashboard-header">
+        <h2 class="dashboard-title"><span>📊</span><span>Emotion Dashboard</span></h2>
+      </div>
+      <div class="dashboard-grid">
+        <!-- Doughnut -->
+        <div class="glass-card chart-card">
+          <div class="chart-title">Session Distribution</div>
+          <div class="chart-canvas-wrap"><canvas id="pieChartCanvas"></canvas></div>
+        </div>
+        <!-- Timeline -->
+        <div class="glass-card chart-card">
+          <div class="chart-title">Live Emotion Timeline</div>
+          <div class="chart-canvas-wrap"><canvas id="timelineChartCanvas"></canvas></div>
+        </div>
+        <!-- VAD Radar -->
+        <div class="glass-card chart-card">
+          <div class="chart-title">Valence · Arousal · Dominance</div>
+          <div class="chart-canvas-wrap"><canvas id="radarChartCanvas"></canvas></div>
+        </div>
+        <!-- Session Stats -->
+        <div class="glass-card chart-card">
+          <div class="chart-title">Session Stats</div>
+          <div class="stats-grid">
+            <div class="stat-item"><div class="stat-label">Detections</div><div class="stat-value" id="statTotal">0</div></div>
+            <div class="stat-item"><div class="stat-label">Dominant</div><div class="stat-value" id="statDominant" style="font-size:var(--fs-md)">--</div></div>
+            <div class="stat-item"><div class="stat-label">Duration</div><div class="stat-value" id="statDuration">0:00</div></div>
+            <div class="stat-item"><div class="stat-label">Inference</div><div class="stat-value" id="statInference" style="color:var(--success)">--</div></div>
+            <div class="stat-item"><div class="stat-label">FPS</div><div class="stat-value" id="fpsStat">--</div></div>
+            <div class="stat-item"><div class="stat-label">Resilience</div><div class="stat-value" id="resilienceScore" style="color:var(--accent)">--</div></div>
+          </div>
+        </div>
+        <!-- 7-Day Forecast -->
+        <div class="glass-card chart-card" style="grid-column:1/-1">
+          <div class="chart-title">🔮 7-Day Mood Forecast</div>
+          <div id="forecastContainer" style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:var(--sp-2)">
+            <div style="color:var(--text-subtle);font-size:var(--fs-sm);padding:var(--sp-4);text-align:center;width:100%">Forecast will appear after a few sessions of data</div>
+          </div>
+        </div>
+        <!-- Session Story -->
+        <div class="glass-card chart-card" style="grid-column:1/-1">
+          <div class="chart-title">📖 Your Emotional Story</div>
+          <p id="sessionStory" style="font-size:var(--fs-sm);color:var(--text-secondary);line-height:var(--lh-loose);font-style:italic">Your story will be written as the session progresses…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ TAB: ECHO ═══════════ -->
+    <div class="tab-panel" id="panel-echo">
+      <div class="echo-container">
+        <div class="echo-avatar-section">
+          <div class="echo-avatar"><span id="echoAvatarEmoji">🤖</span></div>
+          <div id="echoPersonalityBadge" class="echo-personality-badge">📣 Cheerleader Mode</div>
+        </div>
+        <div class="echo-speech glass-card no-hover">
+          <p id="echoSpeechText" style="font-size:var(--fs-md);line-height:var(--lh-loose)">
+            Hi! I'm Echo, your emotional companion. Start scanning and I'll react to how you're feeling! 🌟
+          </p>
+        </div>
+        <div style="margin-top:var(--sp-5)">
+          <div style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--sp-3)">Choose Echo's Personality:</div>
+          <div id="personalitySelector" class="echo-actions"></div>
+        </div>
+        <!-- Wellness in Echo tab -->
+        <div style="margin-top:var(--sp-6)">
+          <h3 style="font-family:var(--font-heading);font-size:var(--fs-lg);margin-bottom:var(--sp-3)">🌿 Wellness Tools</h3>
+          <div class="quick-actions" style="padding:0">
+            <button class="quick-action-btn" onclick="EmoWellness.startBreathing('box')"><span class="quick-action-icon">📦</span>Box</button>
+            <button class="quick-action-btn" onclick="EmoWellness.startBreathing('calm478')"><span class="quick-action-icon">🧘</span>4-7-8</button>
+            <button class="quick-action-btn" onclick="EmoWellness.startBreathing('sigh')"><span class="quick-action-icon">💨</span>Sigh</button>
+            <button class="quick-action-btn" onclick="EmoWellness.startBreathing('energize')"><span class="quick-action-icon">⚡</span>Energize</button>
+            <button class="quick-action-btn" onclick="EmoWellness.activateSOS()"><span class="quick-action-icon">🆘</span>SOS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ TAB: PROFILE ═══════════ -->
+    <div class="tab-panel" id="panel-profile">
+      <div class="profile-grid">
+        <!-- Level Card -->
+        <div class="glass-card" style="grid-column:1/-1">
+          <div class="profile-header">
+            <div class="profile-level-ring" id="profileLevelRing" style="--level-progress:0%">
+              <div class="profile-level-inner"><span id="profileLevelNum">1</span></div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-heading);font-size:var(--fs-xl);font-weight:var(--fw-bold)" id="profileLevelName">Emotion Novice</div>
+              <div style="font-size:var(--fs-sm);color:var(--text-muted)" id="profileXP">0 / 100 XP</div>
+              <div class="xp-bar-container" style="margin-top:var(--sp-2)">
+                <div class="xp-bar-fill" id="profileXpFill" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Achievements -->
+        <div class="glass-card">
+          <div class="chart-title">🏆 Achievements</div>
+          <div id="achievementsList" style="display:flex;flex-direction:column;gap:var(--sp-2);max-height:400px;overflow-y:auto"></div>
+        </div>
+        <!-- Stats -->
+        <div class="glass-card">
+          <div class="chart-title">📈 Your Stats</div>
+          <div class="stats-grid">
+            <div class="stat-item"><div class="stat-label">Resilience</div><div class="stat-value" style="color:var(--accent)">--</div></div>
+            <div class="stat-item"><div class="stat-label">Sessions</div><div class="stat-value">0</div></div>
+            <div class="stat-item"><div class="stat-label">Streak</div><div class="stat-value" style="color:var(--warning)">🔥 0</div></div>
+            <div class="stat-item"><div class="stat-label">Journal</div><div class="stat-value">0</div></div>
+          </div>
+          <!-- Session Story -->
+          <div style="margin-top:var(--sp-4)">
+            <div class="chart-title">📖 Session Story</div>
+            <p id="sessionStory2" style="font-size:var(--fs-sm);color:var(--text-secondary);font-style:italic">Complete a scan session to generate your story…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="app-footer">
+    <span>© 2025 EmoOS · Powered by face-api.js + Chart.js + Web Audio API</span>
+    <div class="privacy-badge">🔒 100% On-Device · Zero Data Transmitted · Privacy-First</div>
+  </footer>
+
+  <!-- ── TAB NAVIGATION ── -->
+  <nav class="tab-nav" aria-label="Main navigation">
+    <button class="tab-btn active" data-tab="scan"><span class="tab-icon">📷</span><span class="tab-label">Scan</span></button>
+    <button class="tab-btn" data-tab="journal"><span class="tab-icon">📝</span><span class="tab-label">Journal</span></button>
+    <button class="tab-btn" data-tab="insights"><span class="tab-icon">📊</span><span class="tab-label">Insights</span></button>
+    <button class="tab-btn" data-tab="echo"><span class="tab-icon">🤖</span><span class="tab-label">Echo</span></button>
+    <button class="tab-btn" data-tab="profile"><span class="tab-icon">👤</span><span class="tab-label">Profile</span></button>
+  </nav>
+</div>
+
+<!-- ══════════ SCRIPTS (order matters) ══════════ -->
+<!-- Core -->
+<script src="js/core/event-bus.js"></script>
+<script src="js/core/state-manager.js"></script>
+<script src="js/core/storage.js"></script>
+
+<!-- Emotion Engine (data, responses, i18n) -->
+<script src="js/emotion-engine.js"></script>
+
+<!-- ML Layer -->
+<script src="js/ml/emotion-classifier.js"></script>
+<script src="js/ml/blink-tracker.js"></script>
+<script src="js/ml/voice-analyzer.js"></script>
+<script src="js/ml/fusion-engine.js"></script>
+<script src="js/ml/face-detector.js"></script>
+
+<!-- Intelligence Layer -->
+<script src="js/intelligence/temporal-memory.js"></script>
+<script src="js/intelligence/anomaly-detector.js"></script>
+<script src="js/intelligence/forecaster.js"></script>
+
+<!-- Features -->
+<script src="js/features/companion.js"></script>
+<script src="js/features/gamification.js"></script>
+<script src="js/features/wellness.js"></script>
+<script src="js/features/journal.js"></script>
+<script src="js/features/reaction-engine.js"></script>
+
+<!-- UI -->
+<script src="js/ui/ambient.js"></script>
+<script src="js/ui/onboarding.js"></script>
+
+<!-- Analytics & Feedback -->
+<script src="js/analytics.js"></script>
+<script src="js/feedback.js"></script>
+
+<!-- Main Orchestrator (must be last) -->
+<script src="js/app.js"></script>
+
+</body>
+</html>

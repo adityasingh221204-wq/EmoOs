@@ -1,0 +1,176 @@
+/* ============================================================
+   EmoOS — Design System Tokens
+   v3.0 | Emotional Operating System
+   ============================================================ */
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { min-height: 100vh; overflow-x: hidden; }
+img, video, canvas { display: block; max-width: 100%; }
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+select { font: inherit; }
+a { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; }
+input, textarea { font: inherit; border: none; outline: none; background: none; }
+
+/* ── Typography ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --font-heading: 'Space Grotesk', 'Outfit', system-ui, sans-serif;
+  --font-body:    'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --fs-xs:   0.68rem;
+  --fs-sm:   0.78rem;
+  --fs-base: 0.92rem;
+  --fs-md:   1.05rem;
+  --fs-lg:   1.25rem;
+  --fs-xl:   1.55rem;
+  --fs-2xl:  1.9rem;
+  --fs-3xl:  2.5rem;
+  --fs-4xl:  3.2rem;
+
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-black:    900;
+
+  --lh-tight:  1.15;
+  --lh-normal: 1.5;
+  --lh-loose:  1.75;
+
+  /* ── Spacing Scale ───────────────────────────────────────── */
+  --sp-1: 0.25rem;   /* 4px */
+  --sp-2: 0.5rem;    /* 8px */
+  --sp-3: 0.75rem;   /* 12px */
+  --sp-4: 1rem;      /* 16px */
+  --sp-5: 1.25rem;   /* 20px */
+  --sp-6: 1.5rem;    /* 24px */
+  --sp-8: 2rem;      /* 32px */
+  --sp-10: 2.5rem;   /* 40px */
+  --sp-12: 3rem;     /* 48px */
+  --sp-16: 4rem;     /* 64px */
+
+  /* ── Border Radius ───────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   22px;
+  --radius-2xl:  30px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.15);
+  --shadow-lg:   0 8px 30px rgba(0,0,0,0.2);
+  --shadow-xl:   0 16px 50px rgba(0,0,0,0.25);
+  --shadow-glow: 0 0 30px rgba(var(--accent-rgb), 0.3);
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --dur-fast:    150ms;
+  --dur-normal:  250ms;
+  --dur-slow:    400ms;
+  --dur-ambient: 2000ms;
+
+  /* ── Z-Index Scale ───────────────────────────────────────── */
+  --z-base:      1;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   500;
+  --z-modal:     1000;
+  --z-toast:     1500;
+  --z-loader:    2000;
+
+  /* ── Glassmorphism ───────────────────────────────────────── */
+  --glass-blur:    20px;
+  --glass-bg:      rgba(255,255,255,0.06);
+  --glass-border:  rgba(255,255,255,0.08);
+  --glass-shadow:  0 8px 32px rgba(0,0,0,0.12);
+
+  /* ── Emotion Color Map (Psychology-Informed) ─────────────── */
+  --emo-happy:     #FBBF24;
+  --emo-sad:       #60A5FA;
+  --emo-angry:     #EF4444;
+  --emo-fearful:   #A78BFA;
+  --emo-disgusted: #34D399;
+  --emo-surprised: #FB923C;
+  --emo-neutral:   #94A3B8;
+
+  --emo-happy-dark:     #D97706;
+  --emo-sad-dark:       #2563EB;
+  --emo-angry-dark:     #B91C1C;
+  --emo-fearful-dark:   #7C3AED;
+  --emo-disgusted-dark: #059669;
+  --emo-surprised-dark: #EA580C;
+  --emo-neutral-dark:   #475569;
+
+  /* ── Semantic Colors ─────────────────────────────────────── */
+  --success:  #22C55E;
+  --warning:  #F59E0B;
+  --danger:   #EF4444;
+  --info:     #3B82F6;
+
+  /* ── Layout ──────────────────────────────────────────────── */
+  --header-h:   60px;
+  --nav-h:      64px;
+  --sidebar-w:  360px;
+  --max-content: 1400px;
+}
+
+/* ── Base Body ──────────────────────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  color: var(--text);
+  background: var(--bg-primary);
+  transition: background var(--dur-ambient) var(--ease-smooth),
+              color var(--dur-slow) var(--ease-smooth);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Utility: Text Gradient ─────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent, #a78bfa), var(--accent2, #60a5fa));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Utility: Scrollbar ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+
+/* ── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: rgba(var(--accent-rgb), 0.3);
+  color: var(--text);
+}
+
+/* ── Focus Visible ──────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Reduced Motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
